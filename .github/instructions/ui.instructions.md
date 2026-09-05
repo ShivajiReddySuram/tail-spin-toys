@@ -20,6 +20,24 @@ Refer to technology-specific instruction files:
 
 ## Core Principles
 
+### Comment Philosophy
+
+Comments should explain **why** a piece of code exists or the reasoning behind a non-obvious decision, not restate **what** the code already says.
+
+- **Document intent and reasoning:** Use comments to explain the *why* behind implementation choices. For example, why a particular algorithm was chosen, why data is transformed a certain way, or why there is a non-obvious workaround.
+- **Avoid restating code:** Do not write comments that merely paraphrase the line below them. If the code is clear, a comment is not needed. Example of a bad comment: `// increment the counter` above `count++;`.
+- **Keep comments current:** Treat outdated comments as bugs. Update or delete them in the same change that touches the related code.
+
+Examples of good comments:
+```ts
+// Stable sort by title ensures the build output is deterministic across machines
+const games = await getAllGames(db).sort((a, b) => a.title.localeCompare(b.title));
+
+// CSV parsing must handle quoted fields with escaped quotes per RFC 4180 to avoid truncation
+// when publishers have names with special characters
+export function parseCsv(content: string): Record<string, string>[] { ... }
+```
+
 ### Testability
 
 - Every interactive element MUST include a `data-testid` attribute

@@ -19,6 +19,7 @@ Unit tests run with **Vitest** (`npm run test:unit`). They cover the two highest
 - Name pattern: `<module>.test.ts`.
 - Use `describe('<module / function>')` blocks and `it('does X when Y')` cases.
 - Add type annotations on helpers and fixtures — this codebase requires explicit types.
+- Keep helpers documented with TSDoc/JSDoc comments so the test code reads clearly (see `drizzle.instructions.md`)
 
 ## Testing Pure Transforms
 
