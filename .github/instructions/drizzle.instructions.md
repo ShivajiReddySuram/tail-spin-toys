@@ -45,15 +45,31 @@ import { asc, count, eq } from 'drizzle-orm';
 import type { Database } from './db';
 import { games } from '../../db/schema';
 
+/** Returns all game IDs ordered alphabetically by title for stable static builds. */
 export async function getAllGameIds(db: Database): Promise<number[]> {
   const rows = await db.select({ id: games.id }).from(games).orderBy(asc(games.title));
   return rows.map((r) => r.id);
 }
 ```
 
-- Always `order by` a stable column (title) so static builds are deterministic.
-- Map raw rows to the app-facing `Game`/`Publisher`/`Category` types in one place; don't leak Drizzle row shapes into components.
-- Keep ordering/lookup logic in `games.ts`, not in pages.
+**Documentation requirements:**
+- Every exported function in `db/` and `src/lib/` must have a TSDoc/JSDoc comment
+- Comments must describe the function's purpose, parameters, and return value
+- Always document the `db` parameter's role: `@param db - The database client (injectable for testability)`
+- Be specific about ordering guarantees or determinism requirements (e.g., "ordered by title for deterministic builds")
+
+Example:
+```ts
+/**
+ * Fetches a single game by its ID with all relations (category, publisher) loaded.
+ * @param db - The database client (injectable for testability).
+ * @param id - The unique game identifier.
+ * @returns The game object with full details, or null if not found.
+ */
+export async function getGameById(db: Database, id: number): Promise<Game | null> {
+  // ...
+}
+```
 
 ## Determinism
 
@@ -70,3 +86,25 @@ Node.js 22.13 or later is required because the data layer uses the built-in `nod
 ## Type checking
 
 The data layer (`db/**/*.ts`, `src/lib/*.ts`) is type-checked by `npm run typecheck`, which runs the native **TypeScript 7** compiler (`tsgo`, from `@typescript/native-preview`) against `tsconfig.tsgo.json`. Keep helpers exported with explicit parameter and return types so `tsgo` can verify them. Linting is unaffected — ESLint + `typescript-eslint` still run on the classic `typescript` package.
+
+## TypeScript Formatting Best Practices
+
+- **Explicit return types:** All exported functions should declare their return type explicitly. This aids IDE inference and catches errors early during type checking.
+  ```ts
+  // Good
+  export async function getGameById(db: Database, id: number): Promise<Game | null> { ... }
+  
+  // Avoid (missing return type)
+  export async function getGameById(db: Database, id: number) { ... }
+  ```
+
+- **Explicit parameter types:** All function parameters should have explicit type annotations. This is especially important in the data layer where type safety is critical.
+  ```ts
+  // Good
+  export async function getAllGames(db: Database): Promise<Game[]> { ... }
+  
+  // Avoid (missing parameter type)
+  export async function getAllGames(db): Promise<Game[]> { ... }
+  ```
+
+These practices are verified by `npm run typecheck` and caught during code review.
